@@ -1,0 +1,1 @@
+{"name":"milan-sentinel","version":"1.0.0","private":true,"scripts":{"test":"playwright test","smoke":"playwright test tests/browser tests/api","nightly":"playwright test"}}
