@@ -1,1 +1,13 @@
-{"name":"milan-sentinel","version":"1.0.0","private":true,"scripts":{"test":"playwright test","smoke":"playwright test tests/browser tests/api","nightly":"playwright test"}}
+{
+  "name": "milan-sentinel",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MILAN 10-million-case automated QA and regression matrix",
+  "type": "commonjs",
+  "scripts": {
+    "list": "node scripts/run-matrix.js --list",
+    "run": "node scripts/run-matrix.js --run",
+    "smoke": "node scripts/run-matrix.js --smoke",
+    "validate": "node scripts/run-matrix.js --validate"
+  }
+}
