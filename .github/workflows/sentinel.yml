@@ -6,34 +6,52 @@ on:
   pull_request:
   workflow_dispatch:
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '*/15 * * * *'
 
 jobs:
-  validate-matrix:
+  validate-and-smoke:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate exact case space
+      - name: Install test runtime
+        run: npm install --no-audit --no-fund
+      - name: Validate exact 10M case space
         run: npm run validate
-      - name: Enumerate representative cases
-        run: npm run smoke > /tmp/sentinel-smoke.jsonl
+      - name: Execute real smoke cases
+        run: npm run smoke
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sentinel-results
+          path: reports/latest-results.json
+          if-no-files-found: ignore
 
-  shard-example:
-    if: github.event_name == 'workflow_dispatch'
+  shard:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        shard: [0,1,2,3,4,5,6,7,8,9]
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Enumerate shard
+      - name: Install test runtime
+        run: npm install --no-audit --no-fund
+      - name: Execute shard
         env:
           SHARD: ${{ matrix.shard }}
-        run: node scripts/run-matrix.js --run --start=$((SHARD * 1000 + 1)) --count=1000 > "shard-${SHARD}.jsonl"
+        run: node scripts/run-matrix.js --run --start=$((SHARD * 500 + 1)) --count=500
+      - name: Upload shard evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sentinel-shard-${{ matrix.shard }}
+          path: reports/latest-results.json
+          if-no-files-found: ignore
